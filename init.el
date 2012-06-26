@@ -11,8 +11,6 @@
 (setq default-buffer-file-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
-(setq file-name-coding-system 'sjis)
-(setq default-process-coding-system '(sjis . sjis))
 ;; install-elisp
 (setq install-elisp-repository-directory "~/.emacs.d/")
 ;; #* というバックアップファイルを作らない
