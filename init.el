@@ -4,6 +4,16 @@
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path "~/.emacs.d/auto-install/")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; shell settings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; use bash
+(setq explicit-shell-file-name "/bin/bash")
+;; PATH
+(setq exec-path (cons "/usr/local/bin/" exec-path))
+(setenv "PATH"
+		(concat '"/usr/local/bin:" (getenv "PATH")))
+(setenv "LANG"  "ja_JP.UTF-8")
 ;======================================================================
 ; 言語文字コード関連の設定
 ;======================================================================
@@ -27,17 +37,6 @@
 (global-font-lock-mode t)
 ;; tab キーでインデントを実行
 (setq tabs-always-indent t)
-;; タブ長の設定
-(setq tab-width 4)
-(setq default-tab-width 4)
-;; enable menubar
-(menu-bar-mode 1)
-;; diable toolbar
-(tool-bar-mode -1)
-;; 起動時の画面はいらない
-(setq inhibit-startup-message t)
-;; アクティブなリージョンをハイライト
-(setq transient-mark-mode t)
 
 ;; 改行コードを表示
 (setq eol-mnemonic-dos "(CRLF)")
@@ -90,9 +89,14 @@
 (setq-default save-place t)
 (require 'saveplace)
 
+;; point-undo								
+(require 'point-undo)
+(define-key global-map (kbd "<f7>") 'point-undo)
+(define-key global-map (kbd "S-<f7>") 'point-redo)
+
 ;; popwin
-(require 'popwin)
-(setq display-buffer-function 'popwin:display-buffer)
+;;(require 'popwin)
+;;(setq display-buffer-function 'popwin:display-buffer)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-install
@@ -139,7 +143,7 @@
 ;; emacs-lisp-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-hook 'emacs-lisp-mode-hook '(lambda () (show-paren-mode t)))
-(add-hook 'emacs-lisp-mode-hook '(lambda () (highlight-parentheses-mode t)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; paredit
@@ -302,8 +306,11 @@ and source-file directory for your debugger." t)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; elisp開発用
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; displays summary
+(require 'summarye)
 ;; 使い捨てファイル
 (require 'open-junk-file)
+(define-key global-map (kbd "\C-x\C-z") 'open-junk-file)
 ;; lispxmp
 (require 'lispxmp)
 (define-key emacs-lisp-mode-map "\C-c\C-e" 'lispxmp)
@@ -424,3 +431,15 @@ and source-file directory for your debugger." t)
 
 ;; full-screen
 (ns-toggle-fullscreen)
+(custom-set-variables
+  ;; custom-set-variables was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ )
+(custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ )
