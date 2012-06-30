@@ -1,5 +1,9 @@
+;======================================================================
+; load-path
+;======================================================================
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path "~/.emacs.d/auto-install/")
+
 ;======================================================================
 ; 言語文字コード関連の設定
 ;======================================================================
@@ -11,8 +15,6 @@
 (setq default-buffer-file-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
-;; install-elisp
-(setq install-elisp-repository-directory "~/.emacs.d/")
 ;; #* というバックアップファイルを作らない
 (setq auto-save-default nil)
 ;; *.~ というバックアップファイルを作らない
@@ -20,9 +22,7 @@
 ;; GCの頻度を減らす
 (setq gc-cons-threshold 5242880)
 ;; スクロールで改行を入れない
-(setq next-line-add-newlines t)
-;; スクロールバー非表示
-(scroll-bar-mode nil)
+(setq next-line-add-newlines nil)
 ;; 色づけ
 (global-font-lock-mode t)
 ;; tab キーでインデントを実行
@@ -34,8 +34,6 @@
 (menu-bar-mode 1)
 ;; diable toolbar
 (tool-bar-mode -1)
-;; 括弧の対応をハイライト
-(setq show-paren-mode t)
 ;; 起動時の画面はいらない
 (setq inhibit-startup-message t)
 ;; アクティブなリージョンをハイライト
@@ -92,6 +90,24 @@
 (setq-default save-place t)
 (require 'saveplace)
 
+;; popwin
+(require 'popwin)
+(setq display-buffer-function 'popwin:display-buffer)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; auto-install
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'auto-install)
+(setq auto-install-directory "~/.emacs.d/auto-install/")
+(auto-install-update-emacswiki-package-name t)
+(auto-install-compatibility-setup)             ; 互換性確保
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; anything
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'anything)
+(require 'anything-startup)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; sr-speedbar
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -114,6 +130,7 @@
 		  (select-window previously-selected-window)
 		(sr-speedbar-select-window))
 		(error "sr-speedbar window not present.")))
+;; select sr-speedbar window
 (define-key global-map (kbd "<f11>") 'sr-speedbar-toggle-window-selection)
 ;; refresh speedbar
 (define-key global-map (kbd "C-<f11>") 'speedbar-refresh)
@@ -122,8 +139,17 @@
 ;; emacs-lisp-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-hook 'emacs-lisp-mode-hook '(lambda () (show-paren-mode t)))
-(add-hook 'emacs-lisp-mode-hook '(lambda () (paredit-mode t)))
 (add-hook 'emacs-lisp-mode-hook '(lambda () (highlight-parentheses-mode t)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; paredit
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(autoload 'paredit-mode "paredit"
+   "Minor mode for pseudo-structurally editing Lisp code." t)
+(add-hook 'emacs-lisp-mode-hook       (lambda () (paredit-mode +1)))
+(add-hook 'lisp-mode-hook             (lambda () (paredit-mode +1)))
+(add-hook 'lisp-interaction-mode-hook (lambda () (paredit-mode +1)))
+(add-hook 'scheme-mode-hook           (lambda () (paredit-mode +1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; sequential-command
@@ -133,17 +159,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; yasnippet
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'load-path "~/.emacs.d/site-lisp/yasnippet")
+(add-to-list 'load-path "~/.emacs.d/site-lisp/yasnippet/")
 (require 'yasnippet) ;; not yasnippet-bundle
 (yas/initialize)
-(yas/load-directory "~/.emacs.d/site-lisp/yasnippet/snippets")
+(yas/load-directory "~/.emacs.d/site-lisp/yasnippet/snippets/")
 (define-key global-map (kbd "C-c y") 'yas/expand)
 
 ;;one-shot snippet
 (defvar yas/oneshot-snippet nil)
 (defun yas/register-oneshot-snippet (s e)
   (interactive "r")
-  (setq yas/oneshot-snippet (buffer-substring-no-properties s e))
+  (setq yas/oneshot-snippet (bufer-substring-no-properties s e))
   (delete-region s e)
   (yas/expand-oneshot-snippet)
   (message "%s" (substitute-command-keys "Press \\[yas/expand-oneshot-snippet] to expand.")))
@@ -394,30 +420,7 @@ and source-file directory for your debugger." t)
   '(progn
      (setq color-theme-is-global t)
      (color-theme-initialize)
-     (color-theme-hober)))
+     (color-theme-billw)))
 
-;;font
-(create-fontset-from-ascii-font "Menlo-14:weight=normal:slant=normal" nil "menlokakugo")
-(set-fontset-font "fontset-menlokakugo"
-                  'unicode
-                  (font-spec :family "Hiragino Kaku ProN" :size 14)
-                  nil
-                  'append)
-(add-to-list 'default-frame-alist '(font . "fontset-menlokakugo"))
-
-;;full-screen
-(defun toggle-fullscreen (&optional f)
-  (interactive)
-  (let ((current-value (frame-parameter nil 'fullscreen)))
-	(set-frame-parameter nil 'fullscreen
-						 (if (equal 'fullboth current-value)
-							 (if (boundp 'old-fullscreen) old-fullscreen nil)
-						   (progn (setq old-fullscreen current-value)
-								  'fullboth)))))
-(global-set-key [f11] 'toggle-fullscreen)
-    ; Make new frames fullscreen by default. Note: this hook doesn't do
-    ; anything to the initial frame if it's in your .emacs, since that file is
-                                        ; read _after_ the initial frame is created.r
-(add-hook 'after-make-frame-functions 'toggle-fullscreen)
-
-
+;; full-screen
+(ns-toggle-fullscreen)
