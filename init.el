@@ -3,7 +3,8 @@
 ;======================================================================
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path "~/.emacs.d/auto-install/")
-
+(add-to-list 'load-path "/usr/local/Cellar/emacs/23.3a/share/emacs/site-lisp/apel/")
+(add-to-list 'load-path "/usr/local/Cellar/emacs/23.3a/share/emacs/site-lisp/emu/")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; shell settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -98,8 +99,17 @@
 (define-key global-map (kbd "S-<f7>") 'point-redo)
 
 ;; popwin
-;;(require 'popwin)
-;;(setq display-buffer-function 'popwin:display-buffer)
+(require 'popwin)
+(setq display-buffer-function 'popwin:display-buffer)
+(setq anything-samewindow nil)
+(push '("*anything*" :height 20) popwin:special-display-config)
+(push '("*Backtrace*" :height 20) popwin:special-display-config)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; elscreen
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(load "elscreen" "ElScreen" t)
+(define-key global-map (kbd "<f10>") 'elscreen-toggle)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-install
@@ -116,11 +126,23 @@
 (require 'anything-startup)
 ;; search for files in the project
 (require 'anything-project)
-(global-set-key (kbd "M-t") 'anything-project)
+(global-set-key (kbd "m-2") 'anything-project)
 (ap:add-project
  :name 'rails
- :look-for '(Rakefile)
+ :look-for '(rakefile)
  :exclude-regexp '("/tmp" "/vendor" "/script"))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; emacs-nav
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-nav-49/")
+(require 'nav)
+(nav-disable-overeager-window-splitting)
+;; Optional: set up a quick key to toggle nav
+(global-set-key [f8] 'nav-toggle)
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; sr-speedbar
@@ -145,7 +167,7 @@
 		(sr-speedbar-select-window))
 		(error "sr-speedbar window not present.")))
 ;; select sr-speedbar window
-(define-key global-map (kbd "<f11>") 'sr-speedbar-toggle-window-selection)
+(define-key global-map (kbd "<f11>") 'sr-speedbar-toggle)
 ;; refresh speedbar
 (define-key global-map (kbd "C-<f11>") 'speedbar-refresh)
 
@@ -225,6 +247,9 @@
 (autoload 'run-ruby "inf-ruby" "Run an inferior Ruby process")
 (autoload 'inf-ruby-keys "inf-ruby" "Set local key defs for inf-ruby in ruby-mode")
 (add-hook 'ruby-mode-hook '(lambda () (inf-ruby-keys)))
+(setq ruby-electric-expand-delimiters-list t)
+(setq ruby-indent-level 2)
+(setq ruby-indent-tabs-mode nil)
 
 ;; rubydb
 (autoload 'ruby "rubydb2x"
@@ -235,9 +260,7 @@ and source-file directory for your debugger." t)
 ;; ruby-electric.el --- electric editing commands for ruby files
 (require 'ruby-electric)
 (add-hook 'ruby-mode-hook '(lambda () (ruby-electric-mode t)))
-(setq ruby-electric-expand-delimiters-list t)
-(setq ruby-indent-level 2)
-(setq ruby-indent-tabs-mode nil)
+
 
 ;; use rvm
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/site-lisp/rvm.el"))
@@ -275,16 +298,10 @@ and source-file directory for your debugger." t)
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
 
 ;; rinari
-(require 'ido)
-(ido-mode t)
+;;(require 'ido)
+;;(ido-mode t)
 (add-to-list 'load-path "~/.emacs.d/site-lisp/rinari")
 (require 'rinari)
-(defun switch-to-or-start-autotest () 	; run autotest or display autotest buffer
-  (interactive)
-  (if (get-buffer "*autotest*")
-	  (switch-to-buffer "*autotest*")
-	(autotest)))
-(define-key rinari-minor-mode-map (kbd "C-c , a") 'switch-to-or-start-autotest)
 ;; set current directory to rinari root berfore executing autotest,
 ;; so that autotest will find spec directory
 (defadvice autotest (before move-to-rinari-root activate)
@@ -306,6 +323,12 @@ and source-file directory for your debugger." t)
 ;; autotest
 (require 'autotest)
 (setq autotest-command "bundle exec autotest")
+(defun switch-to-or-start-autotest () 	; run autotest or display autotest buffer
+  (interactive)
+  (if (get-buffer "*autotest*")
+	  (switch-to-buffer "*autotest*")
+	(autotest)))
+(define-key rinari-minor-mode-map (kbd "C-c , a") 'switch-to-or-start-autotest)
 
 ;; run spork
 (defun spork ()
@@ -387,7 +410,7 @@ and source-file directory for your debugger." t)
 (global-set-key (kbd "M-<down>")  'windmove-down)
 
 ;; C-zでundo
-(global-set-key (kbd "C-z") 'undo)
+;;(global-set-key (kbd "C-z") 'undo)
 
 ;; M-n, M-pで複数行スクロール
 (defvar jump-scroll-amount 10
@@ -450,9 +473,9 @@ and source-file directory for your debugger." t)
 ;; アクティブなリージョンをハイライト
 (setq transient-mark-mode t)
 ;;speedbarを初期表示
-(sr-speedbar-open)
-(speedbar-toggle-show-all-files)
-(sr-speedbar-refresh-turn-off)
+;; (sr-speedbar-open)
+ (speedbar-toggle-show-all-files)
+;; (sr-speedbar-refresh-turn-off)
 
 ;; color theme
 (add-to-list 'load-path "~/.emacs.d/site-lisp/color-theme-6.6.0/")
