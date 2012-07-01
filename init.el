@@ -14,6 +14,9 @@
 (setenv "PATH"
 		(concat '"/usr/local/bin:" (getenv "PATH")))
 (setenv "LANG"  "ja_JP.UTF-8")
+;; color
+
+
 ;======================================================================
 ; 言語文字コード関連の設定
 ;======================================================================
@@ -111,6 +114,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'anything)
 (require 'anything-startup)
+;; search for files in the project
+(require 'anything-project)
+(global-set-key (kbd "M-t") 'anything-project)
+(ap:add-project
+ :name 'rails
+ :look-for '(Rakefile)
+ :exclude-regexp '("/tmp" "/vendor" "/script"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; sr-speedbar
@@ -269,6 +279,19 @@ and source-file directory for your debugger." t)
 (ido-mode t)
 (add-to-list 'load-path "~/.emacs.d/site-lisp/rinari")
 (require 'rinari)
+(defun switch-to-or-start-autotest () 	; run autotest or display autotest buffer
+  (interactive)
+  (if (get-buffer "*autotest*")
+	  (switch-to-buffer "*autotest*")
+	(autotest)))
+(define-key rinari-minor-mode-map (kbd "C-c , a") 'switch-to-or-start-autotest)
+;; set current directory to rinari root berfore executing autotest,
+;; so that autotest will find spec directory
+(defadvice autotest (before move-to-rinari-root activate)
+  "Set current directory to rirari root"
+  (if (assoc 'rinari-minor-mode minor-mode-alist)
+	  (cd (rinari-root))))
+
 
 ;; rhtml mode
 (add-to-list 'load-path "~/.emacs.d/site-lisp/rhtml")
@@ -282,7 +305,18 @@ and source-file directory for your debugger." t)
 
 ;; autotest
 (require 'autotest)
+(setq autotest-command "bundle exec autotest")
 
+;; run spork
+(defun spork ()
+  "Create a new buffer and start spork process on it. If the buffer already exists"
+  (interactive)
+  (if (get-buffer "*spork*")
+	  (switch-to-buffer "*spork*")
+	(progn (switch-to-buffer (generate-new-buffer "*spork*"))
+		   (compilation-shell-minor-mode t)
+		   (start-process "*autotest*" (current-buffer) "spork")
+		   )))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-complete
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
